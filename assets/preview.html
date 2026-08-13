@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SRT 白板动画 · 区域编辑器（无需服务器）</title>
+<title>SRT ホワイトボードアニメーション · 領域エディタ（サーバー不要）</title>
 <style>
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; background: #14161a; color: #e6e8ec; }
+  html, body { margin: 0; height: 100%; font-family: -apple-system, "Segoe UI", "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif; background: #14161a; color: #e6e8ec; }
   body { display: flex; flex-direction: column; height: 100vh; }
   .muted { color: #8b929c; font-size: 12px; }
   .topbar { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: #1c1f26; border-bottom: 1px solid #2a2e37; flex-wrap: wrap; }
@@ -61,57 +61,57 @@
 </head>
 <body>
 <div class="topbar">
-  <div class="brand">SRT 白板 · 区域编辑器</div>
-  <button id="openBtn" class="primary">打开文件夹…</button>
+  <div class="brand">SRT ホワイトボード · 領域エディタ</div>
+  <button id="openBtn" class="primary">フォルダを開く…</button>
   <button id="prevBtn" disabled>‹</button>
   <select id="sceneSel" disabled></select>
   <button id="nextBtn" disabled>›</button>
   <span id="sceneCount" class="muted"></span>
-  <label class="muted" style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="overlayToggle" checked> 区域框</label>
+  <label class="muted" style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="overlayToggle" checked> 領域枠</label>
   <span class="spacer"></span>
   <span id="dirtyFlag" class="dirty"></span>
-  <button id="saveBtn" disabled>保存本场景</button>
-  <button id="saveAllBtn" class="primary" disabled>全部保存</button>
+  <button id="saveBtn" disabled>このシーンを保存</button>
+  <button id="saveAllBtn" class="primary" disabled>すべて保存</button>
 </div>
 
 <div class="body">
   <div class="stage-wrap">
     <div id="hint" class="hint">
-      点 <b>打开文件夹…</b> 选择存放线稿的目录（内含成对的 <code>&lt;名称&gt;.png</code> + <code>&lt;名称&gt;.annotation.json</code>）。<br><br>
-      载入后：默认显示完整图片和区域框；拖动方框整体移动、拖四角/四边缩放调 <code>region</code>；右侧精确改数值、方向、<b>开始/结束时间</b>与<b>字幕</b>；拖动模块列表可<b>调整顺序</b>。拖时间轴或按播放看<b>矩形代理揭示</b>（未开始区域不显示）。<br><br>
-      改完点 <b>保存本场景</b> / <b>全部保存</b> 写回原 <code>.annotation.json</code>（含每个区域的字幕）。<br>
-      <span class="muted">写回原文件需 Chrome / Edge（File System Access API）；其它浏览器将改为下载，请手动覆盖原文件。矩形代理只用于布局/时序；真实连续笔迹请用命令行 <code>render_stream_whiteboard.py</code> 渲染。</span>
+      <b>フォルダを開く…</b> をクリックして、線画を格納したディレクトリを選択してください（<code>&lt;名前&gt;.png</code> と <code>&lt;名前&gt;.annotation.json</code> のペアが入っているもの）。<br><br>
+      読み込み後：既定では画像全体と領域枠を表示します。枠をドラッグすると全体を移動、四隅／四辺をドラッグすると <code>region</code> のサイズを調整できます。右側では数値・方向・<b>開始／終了時間</b>・<b>字幕</b>を正確に編集でき、モジュール一覧をドラッグすると<b>順序を変更</b>できます。タイムラインをドラッグするか再生を押すと<b>矩形プロキシによる描き出し</b>を確認できます（開始前の領域は表示されません）。<br><br>
+      編集後に <b>このシーンを保存</b> / <b>すべて保存</b> をクリックすると、元の <code>.annotation.json</code> に書き戻します（各領域の字幕も含む）。<br>
+      <span class="muted">元ファイルへの書き戻しには Chrome / Edge（File System Access API）が必要です。その他のブラウザではダウンロードに切り替わるため、手動で元ファイルを上書きしてください。矩形プロキシはレイアウト／タイミングの確認用です。実際の連続した筆跡はコマンドライン <code>render_stream_whiteboard.py</code> でレンダリングしてください。</span>
     </div>
     <canvas id="canvas" hidden></canvas>
   </div>
   <aside class="side" id="side" hidden>
-    <h3>绘制模块 <span id="elemCount" class="muted"></span></h3>
-    <p class="tip muted">拖动列表项可调整绘制顺序</p>
+    <h3>描画モジュール <span id="elemCount" class="muted"></span></h3>
+    <p class="tip muted">リスト項目をドラッグして描画順序を変更できます</p>
     <ul id="elist" class="elist"></ul>
     <div class="row-btns">
-      <button id="addBtn">＋ 新增模块</button>
-      <button id="delBtn" disabled>删除选中</button>
+      <button id="addBtn">＋ モジュールを追加</button>
+      <button id="delBtn" disabled>選択中を削除</button>
     </div>
-    <h3>选中模块</h3>
+    <h3>選択中のモジュール</h3>
     <div class="fields" id="fields">
-      <label>名称</label><input type="text" id="f_label" disabled>
+      <label>名前</label><input type="text" id="f_label" disabled>
       <label>x</label><input type="number" id="f_x" min="0" disabled>
       <label>y</label><input type="number" id="f_y" min="0" disabled>
-      <label>宽</label><input type="number" id="f_w" min="1" disabled>
-      <label>高</label><input type="number" id="f_h" min="1" disabled>
+      <label>幅</label><input type="number" id="f_w" min="1" disabled>
+      <label>高さ</label><input type="number" id="f_h" min="1" disabled>
       <label>方向</label>
       <select id="f_dir" disabled>
-        <option value="top_to_bottom">从上至下</option>
-        <option value="bottom_to_top">从下至上</option>
-        <option value="left_to_right">从左至右</option>
-        <option value="right_to_left">从右至左</option>
+        <option value="top_to_bottom">上から下へ</option>
+        <option value="bottom_to_top">下から上へ</option>
+        <option value="left_to_right">左から右へ</option>
+        <option value="right_to_left">右から左へ</option>
       </select>
-      <label>开始(ms)</label><input type="number" id="f_start" min="0" step="100" disabled>
-      <label>结束(ms)</label><input type="number" id="f_end" min="0" step="100" disabled>
-      <label>时长(ms)</label><input type="number" id="f_dur" disabled>
+      <label>開始(ms)</label><input type="number" id="f_start" min="0" step="100" disabled>
+      <label>終了(ms)</label><input type="number" id="f_end" min="0" step="100" disabled>
+      <label>長さ(ms)</label><input type="number" id="f_dur" disabled>
     </div>
     <h3>字幕</h3>
-    <textarea id="f_sub" rows="3" placeholder="该区域对应的字幕（保存进 annotation.json）" disabled></textarea>
+    <textarea id="f_sub" rows="3" placeholder="この領域に対応する字幕（annotation.json に保存されます）" disabled></textarea>
     <ul id="sublist" class="sublist"></ul>
   </aside>
 </div>
@@ -145,7 +145,7 @@ function totalMs() {
   return Math.max(S.cfg && S.cfg.sceneDurationMs || 0, maxEnd + 500, 1000);
 }
 
-// ---------- 打开文件夹 ----------
+// ---------- フォルダを開く ----------
 $('openBtn').addEventListener('click', openDir);
 async function openDir() {
   try {
@@ -156,7 +156,7 @@ async function openDir() {
       for await (const [name, h] of dir.entries()) if (h.kind === 'file') handles[name] = h;
       await loadPairs(Object.keys(handles), n => handles[n].getFile(), n => handles[n]);
     } else { fi.click(); }
-  } catch (e) { if (e && e.name !== 'AbortError') toast('打开失败：' + e.message, true); }
+  } catch (e) { if (e && e.name !== 'AbortError') toast('オープンに失敗しました：' + e.message, true); }
 }
 const fi = document.createElement('input');
 fi.type = 'file'; fi.webkitdirectory = true; fi.multiple = true; fi.hidden = true;
@@ -177,25 +177,25 @@ async function loadPairs(names, getFile, getHandle) {
     let cfg = null, cfgHandle = null;
     if (names.includes(cfgName)) {
       try { cfg = JSON.parse(await (await getFile(cfgName)).text()); }
-      catch (e) { toast(`跳过 ${cfgName}：JSON 解析失败`, true); }
+      catch (e) { toast(`${cfgName} をスキップ：JSON の解析に失敗しました`, true); }
       cfgHandle = getHandle(cfgName);
     }
     const url = URL.createObjectURL(await getFile(inm));
     scenes.push({ name: base, imgName: inm, cfgName, cfg, cfgHandle, imgUrl: url, hasConfig: !!cfg });
   }
-  if (!scenes.length) { toast('目录里没有图片', true); return; }
+  if (!scenes.length) { toast('ディレクトリに画像がありません', true); return; }
   S.scenes = scenes; S.dirty.clear();
   const sel = $('sceneSel');
-  sel.innerHTML = scenes.map((s, i) => `<option value="${i}">${i+1}. ${s.name}${s.hasConfig ? '' : '（未标注）'}</option>`).join('');
+  sel.innerHTML = scenes.map((s, i) => `<option value="${i}">${i+1}. ${s.name}${s.hasConfig ? '' : '（アノテーションなし）'}</option>`).join('');
   sel.disabled = $('prevBtn').disabled = $('nextBtn').disabled = false;
-  $('sceneCount').textContent = `共 ${scenes.length} 张（${scenes.filter(s=>s.hasConfig).length} 张带标注）`;
+  $('sceneCount').textContent = `全 ${scenes.length} 枚（うちアノテーション付き ${scenes.filter(s=>s.hasConfig).length} 枚）`;
   $('hint').hidden = true; canvas.hidden = false; $('side').hidden = false;
   $('playBtn').disabled = $('timeline').disabled = false;
-  if (!canFS) toast('当前浏览器不支持直接写回，保存将改为下载', false);
+  if (!canFS) toast('このブラウザは直接の書き戻しに対応していません。保存はダウンロードになります', false);
   loadScene(0);
 }
 
-// ---------- 载入单场景 ----------
+// ---------- 単一シーンの読み込み ----------
 $('sceneSel').addEventListener('change', e => loadScene(+e.target.value));
 $('prevBtn').addEventListener('click', () => loadScene(S.idx - 1));
 $('nextBtn').addEventListener('click', () => loadScene(S.idx + 1));
@@ -212,9 +212,9 @@ function loadScene(i) {
     if (!Array.isArray(sc.cfg.elements)) sc.cfg.elements = [];
     S.cfg = sc.cfg; S.cfgHandle = sc.cfgHandle;
     samplePaper();
-    updateSaveBtns(); syncEditor(); renderList(); renderSubs(); setTime(0); // 默认停在 0（未播放）→ 显示完整图片
+    updateSaveBtns(); syncEditor(); renderList(); renderSubs(); setTime(0); // 既定では 0 で停止（未再生）→ 画像全体を表示
   };
-  img.onerror = () => toast('图片加载失败：' + sc.imgName, true);
+  img.onerror = () => toast('画像の読み込みに失敗しました：' + sc.imgName, true);
   img.src = sc.imgUrl;
 }
 function samplePaper() {
@@ -227,7 +227,7 @@ function samplePaper() {
   } catch (e) { S.paper = '#fdf0d0'; }
 }
 
-// ---------- reveal 代理渲染 ----------
+// ---------- reveal のプロキシ描画 ----------
 const getProgress = (t, e) => clamp((t - e.reveal.startMs) / e.reveal.durationMs, 0, 1);
 function wobble(a, s) { const env = Math.sin(a*Math.PI); return (Math.sin(a*Math.PI*2*3+s)*1.8 + Math.sin(a*Math.PI*2*7.3+s*1.7)*0.7) * env; }
 function tipPos(e, p) {
@@ -250,7 +250,7 @@ function render() {
   ctx.fillStyle = S.paper; ctx.fillRect(0, 0, w, h);
   const arr = els();
   const done = arr.length ? Math.max(...arr.map(endMs)) : 0;
-  // 未播放且在起点（或无模块、或已全部揭示完）→ 显示完整图片
+  // 未再生かつ開始位置（またはモジュールなし、もしくは全て描き出し済み）→ 画像全体を表示
   const showFull = !arr.length || (!S.playing && S.time <= 0) || S.time >= done + 500;
   if (showFull) {
     ctx.drawImage(S.source, 0, 0, w, h);
@@ -292,7 +292,7 @@ function drawOverlay() {
     ctx.fillRect(r.x, r.y, r.width, r.height); ctx.strokeRect(r.x, r.y, r.width, r.height); ctx.setLineDash([]);
     ctx.fillStyle = focus ? '#3b82f6' : '#e97036';
     ctx.beginPath(); ctx.arc(r.x+18, r.y+18, 15, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 18px "Microsoft YaHei"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 18px "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(i+1, r.x+18, r.y+18);
     if (focus) {
       ctx.fillStyle = '#fff'; ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 3;
@@ -302,11 +302,11 @@ function drawOverlay() {
   });
 }
 
-// ---------- 模块列表（可拖拽排序）----------
+// ---------- モジュール一覧（ドラッグで並べ替え可）----------
 function selectElem(i) { S.sel = i; syncEditor(); renderList(); renderSubs(); render(); }
 function renderList() {
   const arr = els();
-  $('elemCount').textContent = `共 ${arr.length} 个`;
+  $('elemCount').textContent = `全 ${arr.length} 件`;
   $('elist').innerHTML = arr.map((e, i) =>
     `<li draggable="true" data-i="${i}" class="${i===S.sel?'sel':''}"><span class="grip">⋮⋮</span><span class="o">#${i+1}</span><span class="t">${(e.reveal.startMs/1000).toFixed(1)}s</span><span class="nm">${escapeHtml(e.label || '')}</span></li>`
   ).join('');
@@ -323,21 +323,21 @@ function renderList() {
 function reorder(from, to) {
   const arr = els(); if (from < 0 || to < 0 || from === to) return;
   const [m] = arr.splice(from, 1); arr.splice(to, 0, m);
-  arr.forEach((e, i) => e.sequence = i + 1);       // 顺序即 sequence
+  arr.forEach((e, i) => e.sequence = i + 1);       // 並び順がそのまま sequence
   S.sel = to; markDirty(); syncEditor(); renderList(); renderSubs(); render();
 }
 
-// ---------- 字幕列表（选中模块自动高亮）----------
+// ---------- 字幕一覧（選択中のモジュールを自動でハイライト）----------
 function renderSubs() {
   const arr = els();
   $('sublist').innerHTML = arr.map((e, i) => {
     const txt = (e.subtitle || '').trim();
-    return `<li data-i="${i}" class="${i===S.sel?'sel':''} ${txt?'':'empty'}"><span class="o">#${i+1}</span><span class="s">${txt ? escapeHtml(txt) : '（无字幕）'}</span></li>`;
+    return `<li data-i="${i}" class="${i===S.sel?'sel':''} ${txt?'':'empty'}"><span class="o">#${i+1}</span><span class="s">${txt ? escapeHtml(txt) : '（字幕なし）'}</span></li>`;
   }).join('');
   $('sublist').querySelectorAll('li').forEach(li => li.addEventListener('click', () => selectElem(+li.dataset.i)));
 }
 
-// ---------- 选中模块字段 ----------
+// ---------- 選択中モジュールのフィールド ----------
 const F = ['f_label','f_x','f_y','f_w','f_h','f_dir','f_start','f_end','f_dur'];
 function syncEditor() {
   const e = els()[S.sel], on = !!e;
@@ -375,13 +375,13 @@ function applyEditor() {
 F.forEach(id => { if (id !== 'f_dur') $(id).addEventListener('input', applyEditor); });
 $('f_sub').addEventListener('input', () => { const e = els()[S.sel]; if (!e) return; e.subtitle = $('f_sub').value; markDirty(); renderSubs(); });
 
-// ---------- 增删 ----------
+// ---------- 追加・削除 ----------
 $('addBtn').addEventListener('click', () => {
   if (!S.cfg) return;
   const arr = els(), W = S.cfg.canvas.width, H = S.cfg.canvas.height;
   const seq = arr.length + 1;
   const lastEnd = arr.length ? Math.max(...arr.map(endMs)) : 300;
-  const e = { id: `region_${seq}`, label: '新模块', sequence: seq, narrativeRole: '', type: 'object', subtitle: '',
+  const e = { id: `region_${seq}`, label: '新規モジュール', sequence: seq, narrativeRole: '', type: 'object', subtitle: '',
     region: { x: Math.round(W*0.1), y: Math.round(H*0.1), width: Math.round(W*0.25), height: Math.round(H*0.3) },
     reveal: { direction: 'top_to_bottom', startMs: lastEnd + 200, durationMs: 2000, maskPaddingPx: 22, protectedRegions: [] },
     handPath: {} };
@@ -393,7 +393,7 @@ $('delBtn').addEventListener('click', () => {
   S.sel = Math.max(0, S.sel - 1); markDirty(); syncEditor(); renderList(); renderSubs(); render();
 });
 
-// ---------- 画布拖动 / 缩放 ----------
+// ---------- キャンバスのドラッグ / リサイズ ----------
 function canvasPoint(evt) { const b = canvas.getBoundingClientRect(); return { x: (evt.clientX-b.left) * canvas.width/b.width, y: (evt.clientY-b.top) * canvas.height/b.height }; }
 function handleAt(pt, r) { for (const [name, [x, y]] of Object.entries(handlesOf(r))) if (Math.abs(pt.x-x) <= 16 && Math.abs(pt.y-y) <= 16) return name; return null; }
 canvas.addEventListener('pointerdown', evt => {
@@ -423,7 +423,7 @@ canvas.addEventListener('pointermove', evt => {
 });
 canvas.addEventListener('pointerup', () => { S.drag = null; });
 
-// ---------- 时间轴 ----------
+// ---------- タイムライン ----------
 function setTime(v) {
   const dur = totalMs();
   S.time = clamp(v, 0, dur);
@@ -444,24 +444,24 @@ $('saveBtn').addEventListener('click', () => saveScene(S.idx));
 $('saveAllBtn').addEventListener('click', async () => { for (const i of [...S.dirty]) await saveScene(i); });
 async function saveScene(i) {
   const sc = S.scenes[i];
-  // 保存前把总时长对齐到当前编排（最后一个区域结束 + 0.5s 凝视），供渲染器使用
+  // 保存前に総再生時間を現在の構成に合わせる（最後の領域の終了 + 0.5s の余韻）。レンダラーが使用する
   if (i === S.idx && sc.cfg.elements && sc.cfg.elements.length) sc.cfg.sceneDurationMs = totalMs();
   const text = JSON.stringify(sc.cfg, null, 2);
   try {
     let handle = sc.cfgHandle;
     if (!handle && S.dirHandle && S.dirHandle.getFileHandle) handle = await S.dirHandle.getFileHandle(sc.cfgName, { create: true });
     if (handle && handle.createWritable) {
-      if (handle.requestPermission) { const perm = await handle.requestPermission({ mode: 'readwrite' }); if (perm !== 'granted') throw new Error('未授权写入'); }
+      if (handle.requestPermission) { const perm = await handle.requestPermission({ mode: 'readwrite' }); if (perm !== 'granted') throw new Error('書き込みが許可されませんでした'); }
       const w = await handle.createWritable(); await w.write(text); await w.close();
       sc.cfgHandle = handle; sc.hasConfig = true;
     } else { downloadText(sc.cfgName, text); }
     S.dirty.delete(i); if (i === S.idx) $('dirtyFlag').textContent = '';
-    updateSaveBtns(); toast(`已保存：${sc.name}`);
-  } catch (e) { toast(`保存失败：${e.message}`, true); }
+    updateSaveBtns(); toast(`保存しました：${sc.name}`);
+  } catch (e) { toast(`保存に失敗しました：${e.message}`, true); }
 }
 function downloadText(name, text) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = name; a.click(); URL.revokeObjectURL(a.href); }
 
-// ---------- 杂项 ----------
+// ---------- その他 ----------
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
   if (e.code === 'Space') { e.preventDefault(); S.playing ? pause() : play(); }
